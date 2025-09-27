@@ -1,0 +1,54 @@
+# Docker Compose configuration for CarBrain AI Assistant
+# Defines all containers needed for local development environment
+
+version: '3.8'  # Docker Compose file format version
+
+services:  # Define all containers for this project
+  postgres:  # PostgreSQL database container
+    build:
+      context: ./docker/postgres  # Build from custom Dockerfile in docker/postgres/
+      dockerfile: Dockerfile
+    container_name: carbrain_postgres  # Fixed container name for easy reference
+    environment:  # Set PostgreSQL environment variables
+      POSTGRES_DB: carbrain_db      # Create database named carbrain_db
+      POSTGRES_USER: carbrain_user  # Create user carbrain_user
+      POSTGRES_PASSWORD: carbrain_password  # Set password
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"  # Use secure authentication
+    ports:
+      - "5432:5432"  # Map container port 5432 to host port 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist database data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql  # Run init script on startup
+    networks:
+      - carbrain_network  # Connect to custom network
+    healthcheck:  # Check if database is ready
+      test: ["CMD-SHELL", "pg_isready -U carbrain_user -d carbrain_db"]
+      interval: 10s  # Check every 10 seconds
+      timeout: 5s    # Wait 5 seconds for response
+      retries: 5     # Try 5 times before marking unhealthy
+
+  redis:  # Redis cache container for future session/cache management
+    image: redis:7-alpine  # Use Redis 7 Alpine image (lightweight)
+    container_name: carbrain_redis
+    ports:
+      - "6379:6379"  # Standard Redis port
+    volumes:
+      - redis_data:/data  # Persist Redis data
+    networks:
+      - carbrain_network
+    command: redis-server --appendonly yes  # Enable persistence with AOF
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]  # Check Redis responds to ping
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:  # Named volumes for data persistence
+  postgres_data:
+    driver: local  # Store locally on host machine
+  redis_data:
+    driver: local
+
+networks:  # Custom network for container communication
+  carbrain_network:
+    driver: bridge  # Standard Docker bridge network
