@@ -42,7 +42,7 @@ export class DatabaseConnection {
   }
 
   // Execute SQL query with optional parameters and performance monitoring
-  public async query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+  public async query<T extends Record<string, any> = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
     const start = Date.now();  // Start timing for performance monitoring
     try {
       const result = await this.pool.query(text, params);  // Execute query through connection pool

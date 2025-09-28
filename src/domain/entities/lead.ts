@@ -274,7 +274,7 @@ export class Lead {
   close(won: boolean, reason?: string): Lead {
     const updatedData = {
       ...this.data,
-      stage: won ? 'closed_won' : 'closed_lost',
+      stage: won ? 'closed_won' as const : 'closed_lost' as const,
       lostReason: won ? undefined : reason,
       updatedAt: new Date()
     };
