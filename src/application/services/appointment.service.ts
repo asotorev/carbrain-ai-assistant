@@ -254,11 +254,79 @@ export class AppointmentService {
     return await this.appointmentRepository.findTodaysAppointments(agentId);
   }
 
-  async getUpcomingAppointments(hours: number = 24): Promise<Appointment[]> {
-    if (hours < 1 || hours > 168) {
-      throw new Error('Hours parameter must be between 1 and 168 (1 week)');
+  async getAppointmentsByDateRange(startDate: Date, endDate: Date): Promise<Appointment[]> {
+    if (!startDate || !endDate) {
+      throw new Error('Start and end dates are required');
     }
-    return await this.appointmentRepository.findUpcomingAppointments(hours);
+    if (startDate >= endDate) {
+      throw new Error('Start date must be before end date');
+    }
+    return await this.appointmentRepository.findByDateRange(startDate, endDate);
+  }
+
+  async getAppointmentsByType(type: string): Promise<Appointment[]> {
+    const validTypes = ['test_drive', 'vehicle_inspection', 'financing_meeting', 'delivery', 'service_consultation'];
+    if (!validTypes.includes(type)) {
+      throw new Error(`Invalid type. Must be one of: ${validTypes.join(', ')}`);
+    }
+    return await this.appointmentRepository.findByType(type);
+  }
+
+  async markAppointmentCompleted(id: string, notes?: string): Promise<Appointment> {
+    const appointment = await this.appointmentRepository.findById(id);
+    if (!appointment) {
+      throw new Error('Appointment not found');
+    }
+    return await this.appointmentRepository.markAsCompleted(id, notes);
+  }
+
+  async checkAgentAvailability(
+    agentId: string,
+    date: Date,
+    startTime: string,
+    endTime: string
+  ): Promise<boolean> {
+    if (!agentId || agentId.trim().length === 0) {
+      throw new Error('Agent ID is required');
+    }
+    if (!date || !startTime || !endTime) {
+      throw new Error('Date, start time, and end time are required');
+    }
+
+    // Parse time strings and create full DateTime
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+
+    const startDateTime = new Date(date);
+    startDateTime.setHours(startHour || 0, startMinute || 0, 0, 0);
+
+    const endDateTime = new Date(date);
+    endDateTime.setHours(endHour || 0, endMinute || 0, 0, 0);
+
+    // Calculate duration in minutes
+    const durationMinutes = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60);
+
+    return await this.appointmentRepository.checkAgentAvailability(agentId, startDateTime, durationMinutes);
+  }
+
+  async getAgentSchedule(agentId: string, startDate: Date, endDate: Date): Promise<Appointment[]> {
+    if (!agentId || agentId.trim().length === 0) {
+      throw new Error('Agent ID is required');
+    }
+    if (!startDate || !endDate) {
+      throw new Error('Start and end dates are required');
+    }
+    if (startDate >= endDate) {
+      throw new Error('Start date must be before end date');
+    }
+    return await this.appointmentRepository.findAgentSchedule(agentId, startDate, endDate);
+  }
+
+  async getUpcomingAppointments(days: number = 7): Promise<Appointment[]> {
+    if (days < 1 || days > 30) {
+      throw new Error('Days parameter must be between 1 and 30');
+    }
+    return await this.appointmentRepository.findUpcomingAppointments(days);
   }
 
   async getOverdueAppointments(): Promise<Appointment[]> {
@@ -271,7 +339,7 @@ export class AppointmentService {
       throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
     }
 
-    return await this.appointmentRepository.findAppointmentsByStatus(status);
+    return await this.appointmentRepository.findByStatus(status);
   }
 
   async getAppointmentsByAgent(agentId: string): Promise<Appointment[]> {

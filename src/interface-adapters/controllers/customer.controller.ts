@@ -22,7 +22,7 @@ export class CustomerController {
       const phone = req.query.phone as string;
       const language = req.query.language as string;
 
-      const filters = {
+      const filters: any = {
         ...(name && { name }),
         ...(email && { email }),
         ...(phone && { phone }),
@@ -48,6 +48,14 @@ export class CustomerController {
   async getCustomerById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: 'Customer ID is required',
+          message: 'Customer ID is required'
+        });
+        return;
+      }
       const customer = await this.customerService.getCustomerById(id);
 
       if (!customer) {
@@ -107,6 +115,14 @@ export class CustomerController {
   async updateCustomer(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: 'Customer ID is required',
+          message: 'Customer ID is required'
+        });
+        return;
+      }
       const updates = req.body;
 
       const result = await this.updateCustomerUseCase.execute({
@@ -148,6 +164,14 @@ export class CustomerController {
   async deleteCustomer(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: 'Customer ID is required',
+          message: 'Customer ID is required'
+        });
+        return;
+      }
       await this.customerService.deleteCustomer(id);
 
       res.status(200).json({

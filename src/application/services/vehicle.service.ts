@@ -36,20 +36,14 @@ export class VehicleService {
   }
 
   async getAvailableVehicles(): Promise<Vehicle[]> {
-    const filters: VehicleSearchFilters = {
-      isAvailable: true
-    };
-    const result = await this.vehicleRepository.search(filters);
-    return result.vehicles;
+    return await this.vehicleRepository.findAvailableVehicles();
   }
 
   async getVehiclesByMake(make: string): Promise<Vehicle[]> {
     if (!make || make.trim().length === 0) {
       throw new Error('Vehicle make is required');
     }
-    const filters: VehicleSearchFilters = { make: make.toLowerCase() };
-    const result = await this.vehicleRepository.search(filters);
-    return result.vehicles;
+    return await this.vehicleRepository.findByMake(make);
   }
 
   async getVehiclesInPriceRange(minPrice: number, maxPrice: number): Promise<Vehicle[]> {
@@ -60,12 +54,7 @@ export class VehicleService {
       throw new Error('Minimum price cannot be greater than maximum price');
     }
 
-    const priceRange = PriceRangeVO.create({
-      min: minPrice,
-      max: maxPrice,
-      currency: 'MXN'
-    });
-
+    const priceRange = PriceRangeVO.create({ min: minPrice, max: maxPrice, currency: 'MXN' });
     return await this.vehicleRepository.findByPriceRange(priceRange);
   }
 
@@ -73,9 +62,7 @@ export class VehicleService {
     if (limit < 1 || limit > 20) {
       throw new Error('Featured vehicles limit must be between 1 and 20');
     }
-    const filters: VehicleSearchFilters = { isAvailable: true };
-    const result = await this.vehicleRepository.search(filters, undefined, { page: 1, limit });
-    return result.vehicles;
+    return await this.vehicleRepository.findFeaturedVehicles(limit);
   }
 
   async createVehicle(vehicleData: {
@@ -88,11 +75,16 @@ export class VehicleService {
     fuelType: string;
     transmission: string;
     color: string;
+    condition?: string;
     description?: string;
     features?: string[];
     images?: string[];
     isAvailable?: boolean;
     isFeatured?: boolean;
+    doors?: number;
+    seats?: number;
+    drivetrain?: string;
+    location?: any;
   }): Promise<Vehicle> {
     this.validateVehicleData(vehicleData);
 
@@ -100,8 +92,10 @@ export class VehicleService {
       engine: vehicleData.fuelType,
       transmission: vehicleData.transmission,
       fuelType: vehicleData.fuelType,
-      drivetrain: 'FWD',
-      safetyRating: 5
+      drivetrain: vehicleData.drivetrain || 'fwd',
+      safetyRating: 5,
+      doors: vehicleData.doors || 4,
+      seats: vehicleData.seats || 5
     });
 
     const vehicle = Vehicle.create({
@@ -111,13 +105,21 @@ export class VehicleService {
       year: vehicleData.year,
       price: vehicleData.price,
       mileage: vehicleData.mileage,
+      condition: vehicleData.condition || 'used',
       color: vehicleData.color,
       description: vehicleData.description || '',
       specification: specification.toJSON(),
-      features: vehicleData.features || [],
       images: vehicleData.images || [],
       isAvailable: vehicleData.isAvailable ?? true,
-      isFeatured: vehicleData.isFeatured ?? false
+      location: vehicleData.location || {
+        address: 'Dealership Location',
+        city: 'Mexico City',
+        state: 'CDMX',
+        postalCode: '01000',
+        country: 'MX',
+        coordinates: { latitude: 19.4326, longitude: -99.1332 },
+        type: 'dealership'
+      }
     });
 
     return await this.vehicleRepository.save(vehicle);

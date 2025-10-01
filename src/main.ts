@@ -1,6 +1,10 @@
 // Main application entry point
 // Bootstraps the CarBrain AI Assistant API server
 
+import 'tsconfig-paths/register';
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { ExpressServer } from './infrastructure/server/express.server';
 import { DependencyContainer } from './infrastructure/container/dependency-container';
 

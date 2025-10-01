@@ -29,9 +29,7 @@ export class LeadService {
     if (!vehicleId || vehicleId.trim().length === 0) {
       throw new Error('Vehicle ID is required');
     }
-    const filters: LeadSearchFilters = { customerId: vehicleId }; // Note: interface needs vehicleId property
-    const result = await this.leadRepository.search(filters);
-    return result.leads;
+    return await this.leadRepository.findByVehicleId(vehicleId);
   }
 
   async searchLeads(
@@ -91,28 +89,16 @@ export class LeadService {
   }
 
   async progressLeadStage(id: string, newStage: string): Promise<Lead> {
-    const lead = await this.leadRepository.findById(id);
-    if (!lead) {
-      throw new Error('Lead not found');
-    }
-
     const validStages = ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost'];
     if (!validStages.includes(newStage)) {
       throw new Error(`Invalid stage. Must be one of: ${validStages.join(', ')}`);
     }
 
-    // Note: Lead entity methods need to be implemented
-    return await this.leadRepository.update(lead);
+    return await this.leadRepository.updateStage(id, newStage);
   }
 
   async convertLead(id: string): Promise<Lead> {
-    const lead = await this.leadRepository.findById(id);
-    if (!lead) {
-      throw new Error('Lead not found');
-    }
-
-    // Note: Lead entity methods need to be implemented
-    return await this.leadRepository.update(lead);
+    return await this.leadRepository.markAsWon(id);
   }
 
   async markLeadAsLost(id: string, reason: string): Promise<Lead> {
@@ -120,13 +106,7 @@ export class LeadService {
       throw new Error('Loss reason is required');
     }
 
-    const lead = await this.leadRepository.findById(id);
-    if (!lead) {
-      throw new Error('Lead not found');
-    }
-
-    // Note: Lead entity methods need to be implemented
-    return await this.leadRepository.update(lead);
+    return await this.leadRepository.markAsLost(id, reason);
   }
 
   async assignLeadToAgent(id: string, agentId: string): Promise<Lead> {
@@ -134,13 +114,7 @@ export class LeadService {
       throw new Error('Agent ID is required');
     }
 
-    const lead = await this.leadRepository.findById(id);
-    if (!lead) {
-      throw new Error('Lead not found');
-    }
-
-    // Note: Lead entity methods need to be implemented
-    return await this.leadRepository.update(lead);
+    return await this.leadRepository.assignToAgent(id, agentId);
   }
 
   async getLeadsByStage(stage: string): Promise<Lead[]> {
@@ -149,24 +123,18 @@ export class LeadService {
       throw new Error(`Invalid stage. Must be one of: ${validStages.join(', ')}`);
     }
 
-    const filters: LeadSearchFilters = { stage: stage as any };
-    const result = await this.leadRepository.search(filters);
-    return result.leads;
+    return await this.leadRepository.findByStage(stage);
   }
 
   async getLeadsByAgent(agentId: string): Promise<Lead[]> {
     if (!agentId || agentId.trim().length === 0) {
       throw new Error('Agent ID is required');
     }
-    const filters: LeadSearchFilters = { assignedAgent: agentId };
-    const result = await this.leadRepository.search(filters);
-    return result.leads;
+    return await this.leadRepository.findByAgentId(agentId);
   }
 
   async getActiveLeads(): Promise<Lead[]> {
-    const filters: LeadSearchFilters = { isActive: true };
-    const result = await this.leadRepository.search(filters);
-    return result.leads;
+    return await this.leadRepository.findActiveLeads();
   }
 
   async getLeadsInPriceRange(minValue: number, maxValue: number): Promise<Lead[]> {
@@ -177,23 +145,14 @@ export class LeadService {
       throw new Error('Minimum value cannot be greater than maximum value');
     }
 
-    const filters: LeadSearchFilters = {
-      estimatedValueMin: minValue,
-      estimatedValueMax: maxValue
-    };
-    const result = await this.leadRepository.search(filters);
-    return result.leads;
+    return await this.leadRepository.findInPriceRange(minValue, maxValue);
   }
 
   async getRecentLeads(days: number = 30): Promise<Lead[]> {
     if (days < 1 || days > 365) {
       throw new Error('Days parameter must be between 1 and 365');
     }
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - days);
-    const filters: LeadSearchFilters = { createdAfter: cutoffDate };
-    const result = await this.leadRepository.search(filters);
-    return result.leads;
+    return await this.leadRepository.findRecentLeads(days);
   }
 
   async deleteLead(id: string): Promise<void> {

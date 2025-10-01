@@ -2,8 +2,12 @@
 // Handles complex vehicle search workflows with filtering and analytics
 
 import { Vehicle } from '@domain/entities/vehicle';
-import { VehicleService } from '@application/services/vehicle.service';
-import { VehicleSearchFilters } from '@application/interfaces/vehicle-repository.interface';
+import {
+  IVehicleRepository,
+  VehicleSearchFilters,
+  VehicleSearchResult,
+  PaginationOptions
+} from '@application/interfaces/vehicle-repository.interface';
 
 export interface SearchVehiclesRequest {
   filters?: VehicleSearchFilters;
@@ -23,16 +27,18 @@ export interface SearchVehiclesResponse {
 }
 
 export class SearchVehiclesUseCase {
-  constructor(private vehicleService: VehicleService) {}
+  constructor(private vehicleRepository: IVehicleRepository) {}
 
   async execute(request: SearchVehiclesRequest): Promise<SearchVehiclesResponse> {
     const page = Math.max(1, request.page || 1);
     const limit = Math.min(100, Math.max(1, request.limit || 20));
 
-    const searchResult = await this.vehicleService.searchVehicles(
+    const pagination: PaginationOptions = { page, limit };
+
+    const searchResult = await this.vehicleRepository.search(
       request.filters,
-      page,
-      limit
+      undefined, // sort options - can be added later
+      pagination
     );
 
     return {

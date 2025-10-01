@@ -8,7 +8,7 @@ import { createLeadRoutes } from './lead.routes';
 import { createAppointmentRoutes } from './appointment.routes';
 
 // Import interface from dependency container
-import { ApiControllers } from '../../infrastructure/container/dependency-container';
+import { ApiControllers } from '@infrastructure/container/dependency-container';
 
 export function createApiRoutes(controllers: ApiControllers): Router {
   const router = Router();
