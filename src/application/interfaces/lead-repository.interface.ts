@@ -88,6 +88,11 @@ export interface ILeadRepository {
   findActiveLeads(): Promise<Lead[]>;
   findLeadsByStage(stage: string): Promise<Lead[]>;
   findLeadsByAgent(agentId: string): Promise<Lead[]>;
+  findByVehicleId(vehicleId: string): Promise<Lead[]>;
+  findByStage(stage: string): Promise<Lead[]>;
+  findByAgentId(agentId: string): Promise<Lead[]>;
+  findInPriceRange(minValue: number, maxValue: number): Promise<Lead[]>;
+  findRecentLeads(days: number): Promise<Lead[]>;
   findHighPriorityLeads(): Promise<Lead[]>;
   findLeadsRequiringFollowUp(): Promise<Lead[]>;
 
