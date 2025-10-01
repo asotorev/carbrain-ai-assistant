@@ -9,7 +9,7 @@ export class SeedRunner {
   private vehicleRepository: VehicleRepository;
 
   constructor() {
-    this.vehicleRepository = new VehicleRepository();
+    this.vehicleRepository = new VehicleRepository(db);
   }
 
   // Main seeding method - runs all seeders

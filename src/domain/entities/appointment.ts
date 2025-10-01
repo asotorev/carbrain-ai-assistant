@@ -15,7 +15,7 @@ export const AppointmentSchema = z.object({
   location: LocationSchema,
   agentId: z.string().optional(),
   notes: z.string().optional(),
-  preprationItems: z.array(z.string()).default([]),
+  preparationItems: z.array(z.string()).default([]),
   followUpRequired: z.boolean().default(false),
   customerConfirmed: z.boolean().default(false),
   reminderSent: z.boolean().default(false),
@@ -158,8 +158,8 @@ export class Appointment {
     return this.data.notes;
   }
 
-  get preprationItems(): readonly string[] {
-    return this.data.preprationItems;
+  get preparationItems(): readonly string[] {
+    return this.data.preparationItems;
   }
 
   get followUpRequired(): boolean {

@@ -4,16 +4,37 @@
 version: '3.8'  # Docker Compose file format version
 
 services:  # Define all containers for this project
+  api:  # Node.js API container
+    image: node:18-alpine
+    container_name: carbrain_api
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: carbrain_ai
+      DB_USER: carbrain_user
+      DB_PASSWORD: carbrain_pass
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - carbrain_network
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "npm ci && npm run dev"
+
   postgres:  # PostgreSQL database container
-    build:
-      context: ./docker/postgres  # Build from custom Dockerfile in docker/postgres/
-      dockerfile: Dockerfile
+    image: postgres:15
     container_name: carbrain_postgres  # Fixed container name for easy reference
     environment:  # Set PostgreSQL environment variables
-      POSTGRES_DB: carbrain_db      # Create database named carbrain_db
+      POSTGRES_DB: carbrain_ai      # Create database named carbrain_ai
       POSTGRES_USER: carbrain_user  # Create user carbrain_user
-      POSTGRES_PASSWORD: carbrain_password  # Set password
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"  # Use secure authentication
+      POSTGRES_PASSWORD: carbrain_pass  # Set password
     ports:
       - "5432:5432"  # Map container port 5432 to host port 5432
     volumes:
@@ -22,7 +43,7 @@ services:  # Define all containers for this project
     networks:
       - carbrain_network  # Connect to custom network
     healthcheck:  # Check if database is ready
-      test: ["CMD-SHELL", "pg_isready -U carbrain_user -d carbrain_db"]
+      test: ["CMD-SHELL", "pg_isready -U carbrain_user -d carbrain_ai"]
       interval: 10s  # Check every 10 seconds
       timeout: 5s    # Wait 5 seconds for response
       retries: 5     # Try 5 times before marking unhealthy

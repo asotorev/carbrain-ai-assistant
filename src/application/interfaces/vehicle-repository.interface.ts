@@ -60,6 +60,8 @@ export interface IVehicleRepository {
   findAvailableVehicles(locationId?: string): Promise<Vehicle[]>;
   findSimilarVehicles(vehicleId: string, limit?: number): Promise<Vehicle[]>;
   findByPriceRange(priceRange: PriceRangeVO): Promise<Vehicle[]>;
+  findByMake(make: string): Promise<Vehicle[]>;
+  findFeaturedVehicles(limit?: number): Promise<Vehicle[]>;
   findRecommendedForCustomer(customerId: string, limit?: number): Promise<Vehicle[]>;
 
   // Inventory management

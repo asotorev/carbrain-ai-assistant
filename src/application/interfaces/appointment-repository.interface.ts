@@ -140,6 +140,12 @@ export interface IAppointmentRepository {
   findOverdueAppointments(): Promise<Appointment[]>;
   findAppointmentsByStatus(status: string): Promise<Appointment[]>;
   findAppointmentsByAgent(agentId: string): Promise<Appointment[]>;
+  findByDateRange(startDate: Date, endDate: Date): Promise<Appointment[]>;
+  findByType(type: string): Promise<Appointment[]>;
+  findByStatus(status: string): Promise<Appointment[]>;
+  markAsCompleted(id: string, notes?: string): Promise<Appointment>;
+  checkAgentAvailability(agentId: string, startTime: Date, duration: number): Promise<boolean>;
+  findAgentSchedule(agentId: string, startDate: Date, endDate: Date): Promise<Appointment[]>;
 
   // Analytics and reporting
   getAppointmentAnalytics(startDate?: Date, endDate?: Date): Promise<AppointmentAnalytics>;
