@@ -1,8 +1,6 @@
 # Docker Compose configuration for CarBrain AI Assistant
 # Defines all containers needed for local development environment
 
-version: '3.8'  # Docker Compose file format version
-
 services:  # Define all containers for this project
   api:  # Node.js API container
     image: node:18-alpine
@@ -64,11 +62,29 @@ services:  # Define all containers for this project
       timeout: 5s
       retries: 3
 
+  ollama:  # Ollama LLM inference engine for local AI processing
+    image: ollama/ollama:latest
+    container_name: carbrain_ollama
+    ports:
+      - "11434:11434"  # Ollama API port
+    volumes:
+      - ollama_models:/root/.ollama  # Persist downloaded models
+    networks:
+      - carbrain_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 volumes:  # Named volumes for data persistence
   postgres_data:
     driver: local  # Store locally on host machine
   redis_data:
     driver: local
+  ollama_models:
+    driver: local  # Persist Ollama models locally
 
 networks:  # Custom network for container communication
   carbrain_network:
