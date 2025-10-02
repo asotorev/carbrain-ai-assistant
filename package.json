@@ -12,7 +12,8 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "typecheck": "tsc --noEmit",
-    "verify:ollama": "ts-node -r tsconfig-paths/register scripts/verify-ollama.ts"
+    "verify:ollama": "ts-node -r tsconfig-paths/register scripts/verify-ollama.ts",
+    "test:generation": "ts-node -r tsconfig-paths/register scripts/test-ollama-generation.ts"
   },
   "keywords": [
     "automotive",
