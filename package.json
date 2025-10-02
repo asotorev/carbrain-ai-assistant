@@ -11,7 +11,8 @@
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify:ollama": "ts-node -r tsconfig-paths/register scripts/verify-ollama.ts"
   },
   "keywords": [
     "automotive",
