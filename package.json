@@ -15,7 +15,8 @@
     "verify:ollama": "ts-node -r tsconfig-paths/register scripts/verify-ollama.ts",
     "test:generation": "ts-node -r tsconfig-paths/register scripts/test-ollama-generation.ts",
     "test:provider": "ts-node -r tsconfig-paths/register scripts/test-llm-provider.ts",
-    "test:embeddings": "ts-node -r tsconfig-paths/register scripts/test-embeddings.ts"
+    "test:embeddings": "ts-node -r tsconfig-paths/register scripts/test-embeddings.ts",
+    "test:pgvector": "ts-node -r tsconfig-paths/register scripts/test-pgvector.ts"
   },
   "keywords": [
     "automotive",
