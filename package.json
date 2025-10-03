@@ -19,7 +19,8 @@
     "test:pgvector": "ts-node -r tsconfig-paths/register scripts/test-pgvector.ts",
     "test:vector-store": "ts-node -r tsconfig-paths/register scripts/test-vector-store.ts",
     "sync:vehicle-embeddings": "ts-node -r tsconfig-paths/register scripts/test-vehicle-embedding-sync.ts",
-    "verify:rag": "ts-node -r tsconfig-paths/register scripts/verify-rag-dependencies.ts"
+    "verify:rag": "ts-node -r tsconfig-paths/register scripts/verify-rag-dependencies.ts",
+    "test:semantic-search": "ts-node -r tsconfig-paths/register scripts/test-semantic-search.ts"
   },
   "keywords": [
     "automotive",
