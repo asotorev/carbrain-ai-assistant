@@ -4,13 +4,14 @@
 import { Pool } from 'pg';
 import { PgVectorStore } from '../src/infrastructure/ai/vector-stores/pgvector-store';
 import { OllamaEmbeddingService } from '../src/infrastructure/ai/embeddings/ollama-embedding-service';
+import { dbConfig } from '../src/infrastructure/config/database';
 
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  database: process.env.DB_NAME || 'carbrain',
-  user: process.env.DB_USER || 'carbrain_user',
-  password: process.env.DB_PASSWORD || 'carbrain_pass'
+  host: dbConfig.host,
+  port: dbConfig.port,
+  database: dbConfig.database,
+  user: dbConfig.username,
+  password: dbConfig.password
 });
 
 async function testVectorStore(): Promise<void> {

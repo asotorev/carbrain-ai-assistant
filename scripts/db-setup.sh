@@ -26,7 +26,7 @@ echo "Waiting for PostgreSQL to be ready..."
 timeout=60
 counter=0
 
-while ! docker-compose exec -T postgres pg_isready -U carbrain_user -d carbrain_db >/dev/null 2>&1; do
+while ! docker-compose exec -T postgres pg_isready -U carbrain_user -d carbrain_ai >/dev/null 2>&1; do
     if [ $counter -eq $timeout ]; then
         echo "ERROR: Timeout waiting for PostgreSQL to be ready"
         docker-compose logs postgres
@@ -39,9 +39,13 @@ done
 
 echo "SUCCESS: PostgreSQL is ready!"
 
+# Fix collation version mismatch if present
+echo "Refreshing database collation version..."
+docker-compose exec -T postgres psql -U carbrain_user -d carbrain_ai -c "ALTER DATABASE carbrain_ai REFRESH COLLATION VERSION;" >/dev/null 2>&1 || true
+
 # Verify database setup
 echo "Verifying database setup..."
-if docker-compose exec -T postgres psql -U carbrain_user -d carbrain_db -c "SELECT 'Database setup verified' as status;" >/dev/null 2>&1; then
+if docker-compose exec -T postgres psql -U carbrain_user -d carbrain_ai -c "SELECT 'Database setup verified' as status;" >/dev/null 2>&1; then
     echo "SUCCESS: Database verification successful!"
 else
     echo "ERROR: Database verification failed"
@@ -52,11 +56,11 @@ fi
 echo "Database Information:"
 echo "   Host: localhost"
 echo "   Port: 5432"
-echo "   Database: carbrain_db"
+echo "   Database: carbrain_ai"
 echo "   User: carbrain_user"
 
 # Show table count
-TABLE_COUNT=$(docker-compose exec -T postgres psql -U carbrain_user -d carbrain_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
+TABLE_COUNT=$(docker-compose exec -T postgres psql -U carbrain_user -d carbrain_ai -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
 echo "   Tables created: $TABLE_COUNT"
 
 echo "SUCCESS: CarBrain database setup completed successfully!"

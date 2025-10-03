@@ -26,8 +26,8 @@ services:  # Define all containers for this project
       - /app/node_modules
     command: sh -c "npm ci && npm run dev"
 
-  postgres:  # PostgreSQL database container
-    image: postgres:15
+  postgres:  # PostgreSQL database container with pgvector extension
+    image: pgvector/pgvector:pg15
     container_name: carbrain_postgres  # Fixed container name for easy reference
     environment:  # Set PostgreSQL environment variables
       POSTGRES_DB: carbrain_ai      # Create database named carbrain_ai

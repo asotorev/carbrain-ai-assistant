@@ -20,12 +20,23 @@ export type DatabaseConfig = z.infer<typeof DatabaseConfigSchema>;  // TypeScrip
 
 // Load and validate database configuration from environment variables
 export function getDatabaseConfig(): DatabaseConfig {
+  // Validate that critical environment variables are set
+  if (!process.env.DB_NAME) {
+    throw new Error('DB_NAME environment variable is required');
+  }
+  if (!process.env.DB_USER) {
+    throw new Error('DB_USER environment variable is required');
+  }
+  if (!process.env.DB_PASSWORD) {
+    throw new Error('DB_PASSWORD environment variable is required');
+  }
+
   const config = {
     host: process.env.DB_HOST || 'localhost',        // Read from environment or default to localhost
     port: parseInt(process.env.DB_PORT || '5432', 10),  // Convert string to number, default PostgreSQL port
-    database: process.env.DB_NAME || 'carbrain_db',
-    username: process.env.DB_USER || 'carbrain_user',
-    password: process.env.DB_PASSWORD || 'carbrain_password',
+    database: process.env.DB_NAME,                  
+    username: process.env.DB_USER,                  
+    password: process.env.DB_PASSWORD,              
     ssl: process.env.NODE_ENV === 'production',      // Only use SSL in production environment
     poolSize: parseInt(process.env.DB_POOL_SIZE || '10', 10),
     connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || '5000', 10),
