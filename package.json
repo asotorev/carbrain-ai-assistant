@@ -17,7 +17,8 @@
     "test:provider": "ts-node -r tsconfig-paths/register scripts/test-llm-provider.ts",
     "test:embeddings": "ts-node -r tsconfig-paths/register scripts/test-embeddings.ts",
     "test:pgvector": "ts-node -r tsconfig-paths/register scripts/test-pgvector.ts",
-    "test:vector-store": "ts-node -r tsconfig-paths/register scripts/test-vector-store.ts"
+    "test:vector-store": "ts-node -r tsconfig-paths/register scripts/test-vector-store.ts",
+    "sync:vehicle-embeddings": "ts-node -r tsconfig-paths/register scripts/test-vehicle-embedding-sync.ts"
   },
   "keywords": [
     "automotive",
