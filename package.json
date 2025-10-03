@@ -18,7 +18,8 @@
     "test:embeddings": "ts-node -r tsconfig-paths/register scripts/test-embeddings.ts",
     "test:pgvector": "ts-node -r tsconfig-paths/register scripts/test-pgvector.ts",
     "test:vector-store": "ts-node -r tsconfig-paths/register scripts/test-vector-store.ts",
-    "sync:vehicle-embeddings": "ts-node -r tsconfig-paths/register scripts/test-vehicle-embedding-sync.ts"
+    "sync:vehicle-embeddings": "ts-node -r tsconfig-paths/register scripts/test-vehicle-embedding-sync.ts",
+    "verify:rag": "ts-node -r tsconfig-paths/register scripts/verify-rag-dependencies.ts"
   },
   "keywords": [
     "automotive",
@@ -43,6 +44,7 @@
   },
   "dependencies": {
     "@langchain/community": "^0.3.57",
+    "@langchain/core": "^0.3.78",
     "@langchain/ollama": "^0.2.4",
     "@types/express": "^4.17.0",
     "@types/pg": "^8.10.0",
