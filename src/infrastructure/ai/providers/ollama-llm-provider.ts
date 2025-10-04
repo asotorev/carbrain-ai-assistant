@@ -16,8 +16,9 @@ export class OllamaLLMProvider implements ILLMProvider {
   private client: OllamaClient;
   private modelName: string;
 
-  constructor(modelName?: string) {
-    this.modelName = modelName || 'llama3.2:1b';
+  constructor(modelName: string) {
+    // Append :latest tag if no tag specified
+    this.modelName = modelName.includes(':') ? modelName : `${modelName}:latest`;
 
     this.llm = new Ollama({
       baseUrl: aiConfig.ollama.baseUrl,

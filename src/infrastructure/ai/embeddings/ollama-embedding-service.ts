@@ -12,8 +12,9 @@ export class OllamaEmbeddingService implements IEmbeddingService {
   private modelName: string;
   private dimensions: number;
 
-  constructor(modelName?: string) {
-    this.modelName = modelName || 'nomic-embed-text:latest';
+  constructor(modelName: string) {
+    // Append :latest tag if no tag specified
+    this.modelName = modelName.includes(':') ? modelName : `${modelName}:latest`;
     this.dimensions = 768; // nomic-embed-text produces 768-dimensional vectors
 
     this.embeddings = new OllamaEmbeddings({
