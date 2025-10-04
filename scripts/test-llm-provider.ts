@@ -3,6 +3,7 @@
 
 import { OllamaLLMProvider } from '../src/infrastructure/ai/providers/ollama-llm-provider';
 import { ChatMessage } from '../src/application/interfaces/llm-provider.interface';
+import { aiConfig } from '@infrastructure/config/ai';
 
 async function testLLMProvider(): Promise<void> {
   console.log('='.repeat(60));
@@ -10,7 +11,7 @@ async function testLLMProvider(): Promise<void> {
   console.log('='.repeat(60));
   console.log();
 
-  const provider = new OllamaLLMProvider();
+  const provider = new OllamaLLMProvider(aiConfig.ollama.defaultModel);
 
   // Test 1: Provider availability
   console.log('Test 1: Provider Availability Check');

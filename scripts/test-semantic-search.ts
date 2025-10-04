@@ -9,6 +9,7 @@ import { PgVectorStore } from '@infrastructure/ai/vector-stores/pgvector-store';
 import { OllamaLLMProvider } from '@infrastructure/ai/providers/ollama-llm-provider';
 import { SemanticVehicleSearchService } from '@application/services/semantic-vehicle-search.service';
 import { dbConfig } from '@infrastructure/config/database';
+import { aiConfig } from '@infrastructure/config/ai';
 
 async function testSemanticSearch() {
   console.log('=== Semantic Vehicle Search Test ===\n');
@@ -23,15 +24,15 @@ async function testSemanticSearch() {
   });
 
   console.log('Initializing services...');
-  const embeddingService = new OllamaEmbeddingService();
-  const vectorStore = new PgVectorStore(pool, 'vehicle_embeddings');
+  const embeddingService = new OllamaEmbeddingService(aiConfig.ollama.embeddingModel);
+  const vectorStore = new PgVectorStore(pool, aiConfig.vectorStore.tableName);
 
   // Initialize vector store table
   console.log('Initializing vector store...');
   await vectorStore.initialize();
   console.log('Vector store initialized\n');
 
-  const llmProvider = new OllamaLLMProvider('llama3.2:1b');
+  const llmProvider = new OllamaLLMProvider(aiConfig.ollama.defaultModel);
   const vehicleRepository = new VehicleRepository(dbConnection);
 
   const searchService = new SemanticVehicleSearchService(
