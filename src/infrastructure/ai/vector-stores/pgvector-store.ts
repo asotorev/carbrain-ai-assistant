@@ -100,27 +100,64 @@ export class PgVectorStore implements IVectorStore {
     const limit = options?.limit || 10;
     const threshold = options?.threshold || 0;
 
-    let query = `
-      SELECT
-        id,
-        content,
-        metadata,
-        1 - (embedding <=> $1::vector) as similarity
-      FROM ${this.tableName}
-      WHERE 1 - (embedding <=> $1::vector) >= $2
-    `;
+    // Check if this is the vehicles table (doesn't have 'content' column)
+    const isVehiclesTable = this.tableName === 'vehicles';
 
-    if (options?.filter && Object.keys(options.filter).length > 0) {
-      const filterConditions = Object.entries(options.filter)
-        .map(([key, value]) => `metadata->>'${key}' = '${value}'`)
-        .join(' AND ');
-      query += ` AND ${filterConditions}`;
+    let query: string;
+    if (isVehiclesTable) {
+      // Query for vehicles table structure
+      query = `
+        SELECT
+          id::text as id,
+          description as content,
+          jsonb_build_object(
+            'make', make,
+            'model', model,
+            'year', year,
+            'price', price,
+            'condition', condition
+          ) as metadata,
+          1 - (embedding <=> $1::vector) as similarity
+        FROM ${this.tableName}
+        WHERE embedding IS NOT NULL
+          AND 1 - (embedding <=> $1::vector) >= $2
+      `;
+
+      if (options?.filter && Object.keys(options.filter).length > 0) {
+        const filterConditions = Object.entries(options.filter)
+          .map(([key, value]) => `${key} = '${value}'`)
+          .join(' AND ');
+        query += ` AND ${filterConditions}`;
+      }
+
+      query += `
+        ORDER BY embedding <=> $1::vector
+        LIMIT $3
+      `;
+    } else {
+      // Query for standard vector_documents table structure
+      query = `
+        SELECT
+          id,
+          content,
+          metadata,
+          1 - (embedding <=> $1::vector) as similarity
+        FROM ${this.tableName}
+        WHERE 1 - (embedding <=> $1::vector) >= $2
+      `;
+
+      if (options?.filter && Object.keys(options.filter).length > 0) {
+        const filterConditions = Object.entries(options.filter)
+          .map(([key, value]) => `metadata->>'${key}' = '${value}'`)
+          .join(' AND ');
+        query += ` AND ${filterConditions}`;
+      }
+
+      query += `
+        ORDER BY embedding <=> $1::vector
+        LIMIT $3
+      `;
     }
-
-    query += `
-      ORDER BY embedding <=> $1::vector
-      LIMIT $3
-    `;
 
     const result = await this.pool.query(query, [
       JSON.stringify(queryEmbedding),
