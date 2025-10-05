@@ -5,9 +5,8 @@ import { Pool } from 'pg';
 import { DatabaseConnection } from '@infrastructure/database/connection';
 import { VehicleRepository } from '@infrastructure/database/repositories/vehicle.repository';
 import { ConversationRepository } from '@infrastructure/database/repositories/conversation.repository';
-import { OllamaEmbeddingService } from '@infrastructure/ai/embeddings/ollama-embedding-service';
 import { PgVectorStore } from '@infrastructure/ai/vector-stores/pgvector-store';
-import { OllamaLLMProvider } from '@infrastructure/ai/providers/ollama-llm-provider';
+import { AIProviderFactory } from '@infrastructure/ai/ai-provider-factory';
 import { SemanticVehicleSearchService } from '@application/services/semantic-vehicle-search.service';
 import { ConversationalRAGService } from '@application/services/conversational-rag.service';
 import { AIController } from '@interface-adapters/controllers/ai.controller';
@@ -21,9 +20,6 @@ export interface AIServerConfig {
   dbName: string;
   dbUser: string;
   dbPassword: string;
-  ollamaBaseUrl?: string;
-  ollamaModel?: string;
-  embeddingModel?: string;
 }
 
 export function setupAIServer(config: AIServerConfig): Router {
@@ -42,16 +38,10 @@ export function setupAIServer(config: AIServerConfig): Router {
   const vehicleRepository = new VehicleRepository(db);
   const conversationRepository = new ConversationRepository(db);
 
-  // Initialize AI services
-  const embeddingService = new OllamaEmbeddingService(
-    config.embeddingModel || aiConfig.ollama.embeddingModel
-  );
-
+  // Initialize AI services using factory pattern
+  const embeddingService = AIProviderFactory.createEmbeddingService();
+  const llmProvider = AIProviderFactory.createLLMProvider();
   const vectorStore = new PgVectorStore(pool, aiConfig.vectorStore.tableName);
-
-  const llmProvider = new OllamaLLMProvider(
-    config.ollamaModel || aiConfig.ollama.defaultModel
-  );
 
   const semanticSearch = new SemanticVehicleSearchService(
     embeddingService,
@@ -62,8 +52,7 @@ export function setupAIServer(config: AIServerConfig): Router {
 
   const conversationalRAG = new ConversationalRAGService(
     semanticSearch,
-    config.ollamaModel || 'llama3.2',
-    config.ollamaBaseUrl || 'http://localhost:11434'
+    llmProvider
   );
 
   // Initialize controller

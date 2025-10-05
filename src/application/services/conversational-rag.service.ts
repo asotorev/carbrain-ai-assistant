@@ -1,10 +1,7 @@
 // Conversational RAG service for multi-turn vehicle search dialogues
 // Maintains conversation context and provides intelligent follow-up handling
 
-import { ChatOllama } from '@langchain/ollama';
-import { BaseMessage, HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
-import { StringOutputParser } from '@langchain/core/output_parsers';
-import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
+import { ILLMProvider } from '@application/interfaces/llm-provider.interface';
 import { SemanticVehicleSearchService } from './semantic-vehicle-search.service';
 import { Vehicle } from '@domain/entities/vehicle';
 
@@ -34,23 +31,15 @@ export interface ConversationalResponse {
 }
 
 export class ConversationalRAGService {
-  private llm: ChatOllama;
-  private outputParser: StringOutputParser;
+  private llmProvider: ILLMProvider;
   private systemPrompt: string;
 
   constructor(
     private semanticSearch: SemanticVehicleSearchService,
-    modelName: string = 'llama3.2',
-    baseUrl: string = 'http://localhost:11434'
+    llmProvider?: ILLMProvider
   ) {
-    this.llm = new ChatOllama({
-      model: modelName,
-      baseUrl: baseUrl,
-      temperature: 0.7,
-      numPredict: 100,  // Limit response length for faster test execution
-    });
-
-    this.outputParser = new StringOutputParser();
+    // Use provided LLM provider or get default from semantic search
+    this.llmProvider = llmProvider || this.semanticSearch['llmProvider'];
 
     this.systemPrompt = `You are CarBrain, an expert automotive sales assistant specializing in the Mexican car market.
 
@@ -122,24 +111,20 @@ When no exact matches:
       searchContext = this.buildVehicleContext(vehicles, []);
     }
 
-    // Build conversation prompt
-    const prompt = ChatPromptTemplate.fromMessages([
-      ['system', this.systemPrompt],
-      new MessagesPlaceholder('history'),
-      ['system', `Current vehicle search results:\n${searchContext}`],
-      ['human', '{input}']
-    ]);
+    // Build conversation messages for LLM
+    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+      { role: 'system', content: this.systemPrompt },
+      ...context.messages.map(msg => ({
+        role: msg.role as 'system' | 'user' | 'assistant',
+        content: msg.content
+      })),
+      { role: 'system', content: `Current vehicle search results:\n${searchContext}` },
+      { role: 'user', content: userMessage }
+    ];
 
-    // Convert context messages to LangChain format
-    const history = this.convertToLangChainMessages(context.messages);
-
-    // Generate response
-    const chain = prompt.pipe(this.llm).pipe(this.outputParser);
-
-    const response = await chain.invoke({
-      history,
-      input: userMessage
-    });
+    // Generate response using LLM provider
+    const chatResponse = await this.llmProvider.chat(messages);
+    const response = chatResponse.content;
 
     // Add assistant response to context
     newContext.messages.push({
@@ -233,21 +218,6 @@ When no exact matches:
       role: msg.role === 'system' ? 'assistant' : msg.role,
       content: msg.content
     }));
-  }
-
-  private convertToLangChainMessages(messages: ConversationMessage[]): BaseMessage[] {
-    return messages.map(msg => {
-      switch (msg.role) {
-        case 'system':
-          return new SystemMessage(msg.content);
-        case 'user':
-          return new HumanMessage(msg.content);
-        case 'assistant':
-          return new AIMessage(msg.content);
-        default:
-          return new HumanMessage(msg.content);
-      }
-    });
   }
 
   private updateUserPreferences(context: ConversationContext, message: string): void {

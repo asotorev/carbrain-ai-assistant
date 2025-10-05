@@ -1,9 +1,8 @@
 // Test script for LLM provider abstraction layer
-// Validates OllamaLLMProvider implementation through ILLMProvider interface
+// Validates LLM provider implementation through ILLMProvider interface
 
-import { OllamaLLMProvider } from '../src/infrastructure/ai/providers/ollama-llm-provider';
 import { ChatMessage } from '../src/application/interfaces/llm-provider.interface';
-import { aiConfig } from '@infrastructure/config/ai';
+import { AIProviderFactory } from '@infrastructure/ai/ai-provider-factory';
 
 async function testLLMProvider(): Promise<void> {
   console.log('='.repeat(60));
@@ -11,7 +10,9 @@ async function testLLMProvider(): Promise<void> {
   console.log('='.repeat(60));
   console.log();
 
-  const provider = new OllamaLLMProvider(aiConfig.ollama.defaultModel);
+  const provider = AIProviderFactory.createLLMProvider();
+  const providerInfo = AIProviderFactory.getProviderInfo();
+  console.log(`Using ${providerInfo.provider} provider with model: ${providerInfo.llmModel}\n`);
 
   // Test 1: Provider availability
   console.log('Test 1: Provider Availability Check');
@@ -22,7 +23,9 @@ async function testLLMProvider(): Promise<void> {
 
   if (!isAvailable) {
     console.error('ERROR: Provider is not available');
-    console.log('Please ensure Ollama is running and models are installed');
+    console.log('Please ensure your AI provider is configured and running');
+    console.log('For Ollama: ensure Ollama is running and models are installed');
+    console.log('For OpenAI: ensure OPENAI_API_KEY is set in environment variables');
     process.exit(1);
   }
   console.log('SUCCESS: Provider is available');

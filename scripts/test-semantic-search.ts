@@ -1,12 +1,12 @@
 // Test script for semantic vehicle search service
 // Validates natural language vehicle queries using RAG pipeline
 
+import 'dotenv/config';
 import { Pool } from 'pg';
 import { DatabaseConnection } from '@infrastructure/database/connection';
 import { VehicleRepository } from '@infrastructure/database/repositories/vehicle.repository';
-import { OllamaEmbeddingService } from '@infrastructure/ai/embeddings/ollama-embedding-service';
+import { AIProviderFactory } from "@infrastructure/ai/ai-provider-factory";
 import { PgVectorStore } from '@infrastructure/ai/vector-stores/pgvector-store';
-import { OllamaLLMProvider } from '@infrastructure/ai/providers/ollama-llm-provider';
 import { SemanticVehicleSearchService } from '@application/services/semantic-vehicle-search.service';
 import { dbConfig } from '@infrastructure/config/database';
 import { aiConfig } from '@infrastructure/config/ai';
@@ -24,7 +24,7 @@ async function testSemanticSearch() {
   });
 
   console.log('Initializing services...');
-  const embeddingService = new OllamaEmbeddingService(aiConfig.ollama.embeddingModel);
+  const embeddingService = AIProviderFactory.createEmbeddingService();
   const vectorStore = new PgVectorStore(pool, aiConfig.vectorStore.tableName);
 
   // Initialize vector store table
@@ -32,7 +32,7 @@ async function testSemanticSearch() {
   await vectorStore.initialize();
   console.log('Vector store initialized\n');
 
-  const llmProvider = new OllamaLLMProvider(aiConfig.ollama.defaultModel);
+  const llmProvider = AIProviderFactory.createLLMProvider();
   const vehicleRepository = new VehicleRepository(dbConnection);
 
   const searchService = new SemanticVehicleSearchService(

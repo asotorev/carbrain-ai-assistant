@@ -13,37 +13,67 @@ Complete AI/ML infrastructure for conversational vehicle search and recommendati
 │    ConversationalRAGService + SemanticVehicleSearch         │
 ├─────────────────────────────────────────────────────────────┤
 │                   AI Infrastructure                         │
-│   Ollama LLM + Embeddings + Vector Store (pgvector)         │
+│  LLM Provider (OpenAI/Ollama) + Vector Store (pgvector)     │
 ├─────────────────────────────────────────────────────────────┤
 │                   Data Persistence                          │
 │         PostgreSQL (Vehicles + Conversations)               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Provider Options
+
+CarBrain supports two AI providers that can be switched via environment configuration:
+
+### OpenAI (Default)
+- **Advantages**: 10-20x faster responses (1-3s vs 20-40s), high-quality output
+- **Models**: gpt-3.5-turbo, gpt-4, text-embedding-3-small
+- **Cost**: API usage costs per request
+- **Setup**: Requires OpenAI API key
+
+### Ollama (Local Alternative)
+- **Advantages**: Free, runs locally, no API costs, data privacy
+- **Models**: llama3.2, nomic-embed-text
+- **Cost**: Free (requires local compute resources)
+- **Setup**: Requires Docker and model downloads
+
 ## Components
 
-### 1. LLM Provider (Ollama)
+### 1. LLM Provider
 
-- **Model**: llama3.2 (configurable)
-- **Purpose**: Natural language understanding and generation
-- **Features**:
-  - Bilingual support (Spanish/English)
-  - Context-aware responses
-  - Vehicle recommendation explanations
+#### OpenAI
+- **Models**: gpt-3.5-turbo, gpt-4
+- **Response Time**: 1-3 seconds
+- **Features**: High-quality bilingual responses, advanced reasoning
+
+#### Ollama
+- **Model**: llama3.2 (local)
+- **Response Time**: 20-40 seconds
+- **Features**: Free, private, self-hosted
+
+**Common Features**:
+- Bilingual support (Spanish/English)
+- Context-aware responses
+- Vehicle recommendation explanations
 
 ### 2. Embedding Service
 
+#### OpenAI
+- **Model**: text-embedding-3-small (1536 dimensions)
+- **Speed**: Fast API-based generation
+
+#### Ollama
 - **Model**: nomic-embed-text (768 dimensions)
-- **Purpose**: Convert text to vector representations
-- **Used for**:
-  - Vehicle descriptions
-  - User queries
-  - Semantic similarity matching
+- **Speed**: Local generation
+
+**Used for**:
+- Vehicle descriptions vectorization
+- User query embeddings
+- Semantic similarity matching
 
 ### 3. Vector Store (pgvector)
 
 - **Database**: PostgreSQL with pgvector extension
-- **Storage**: 768-dimensional vectors
+- **Storage**: Variable dimensions (768 for Ollama, 1536 for OpenAI)
 - **Operations**:
   - Cosine similarity search
   - Batch embedding storage
@@ -183,11 +213,28 @@ npm run seed
 npm run sync:vehicle-embeddings
 ```
 
-### 4. Start Ollama Services
+### 4. Configure AI Provider
+
+#### For OpenAI (Recommended for Production)
 
 ```bash
-# Ollama should be running via docker-compose
-# Verify with:
+# Add to .env
+AI_PROVIDER=openai
+OPENAI_API_KEY=sk-your-api-key-here
+OPENAI_MODEL=gpt-3.5-turbo
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+```
+
+#### For Ollama (Local Development)
+
+```bash
+# Add to .env
+AI_PROVIDER=ollama
+
+# Start Ollama via docker-compose
+docker-compose up -d ollama
+
+# Verify Ollama is running
 npm run verify:ollama
 ```
 
@@ -211,9 +258,19 @@ npm run test:e2e-ai
 ## Environment Variables
 
 ```env
-# Ollama Configuration
+# AI Provider Selection
+AI_PROVIDER=openai  # or 'ollama'
+
+# OpenAI Configuration (when AI_PROVIDER=openai)
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-3.5-turbo
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+# Ollama Configuration (when AI_PROVIDER=ollama)
 OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_DEFAULT_MODEL=llama3.2
+OLLAMA_DEFAULT_MODEL=llama3.2:1b
+OLLAMA_EMBEDDING_MODEL=nomic-embed-text
+OLLAMA_TIMEOUT=30000
 
 # Database (from .env)
 DB_HOST=localhost
@@ -293,7 +350,7 @@ curl http://localhost:3000/api/ai/health
 
 ### Service Status
 
-- Embedding service: Ollama reachable
+- Embedding service: Provider reachable (OpenAI API or Ollama)
 - Vector store: Database connection + pgvector extension
 - LLM provider: Model loaded and responsive
 
@@ -305,6 +362,21 @@ curl http://localhost:3000/api/ai/health
 - User engagement (messages per conversation)
 
 ## Troubleshooting
+
+### OpenAI API Issues
+
+```bash
+# Check API key is set
+echo $OPENAI_API_KEY
+
+# Test API connection
+npm run test:llm-provider
+
+# Common issues:
+# - Invalid API key
+# - Rate limits exceeded
+# - Network connectivity
+```
 
 ### Ollama not responding
 

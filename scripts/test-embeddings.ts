@@ -1,7 +1,7 @@
 // Test script for embedding service and vector similarity
 // Validates text-to-vector conversion and semantic similarity calculations
 
-import { OllamaEmbeddingService } from '../src/infrastructure/ai/embeddings/ollama-embedding-service';
+import { AIProviderFactory } from "@infrastructure/ai/ai-provider-factory";
 import { aiConfig } from '@infrastructure/config/ai';
 
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
@@ -30,7 +30,7 @@ async function testEmbeddings(): Promise<void> {
   console.log('='.repeat(60));
   console.log();
 
-  const embeddingService = new OllamaEmbeddingService(aiConfig.ollama.embeddingModel);
+  const embeddingService = AIProviderFactory.createEmbeddingService();
 
   // Test 1: Service availability
   console.log('Test 1: Service Availability Check');
