@@ -53,15 +53,22 @@ coverage/
 .docker/
 docker-compose.override.yml
 
-# AI/ML specific
+# AI/ML specific - data files only, not source code
 models/
 *.model
 *.bin
 *.safetensors
-embeddings/
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.pt
+*.pth
 vector_db/
 training_data/
 fine_tuned_models/
+embeddings_cache/
+*.embeddings
 
 # Database
 *.db

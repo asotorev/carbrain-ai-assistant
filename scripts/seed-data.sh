@@ -14,7 +14,7 @@ if [ ! -d "node_modules" ]; then
 fi
 
 # Check if database is running
-if ! docker-compose exec -T postgres pg_isready -U carbrain_user -d carbrain_db >/dev/null 2>&1; then
+if ! docker-compose exec -T postgres pg_isready -U carbrain_user -d carbrain_ai >/dev/null 2>&1; then
     echo "ERROR: PostgreSQL database is not running."
     echo "Please run './scripts/db-setup.sh' first to start the database."
     exit 1
@@ -59,12 +59,12 @@ done
 
 # Build seeding command
 SEED_CMD="npm run build && node -e \"
-const { runSeeding } = require('./dist/infrastructure/database/seeders/seed-runner');
+const { runSeeding } = require('./dist/src/infrastructure/database/seeders/seed-runner');
 runSeeding({ force: $FORCE_SEED, verify: $VERIFY_DATA });
 \""
 
 # Check current vehicle count
-CURRENT_COUNT=$(docker-compose exec -T postgres psql -U carbrain_user -d carbrain_db -t -c "SELECT COUNT(*) FROM vehicles;" | tr -d ' ')
+CURRENT_COUNT=$(docker-compose exec -T postgres psql -U carbrain_user -d carbrain_ai -t -c "SELECT COUNT(*) FROM vehicles;" | tr -d ' ')
 
 if [ "$CURRENT_COUNT" -gt 0 ] && [ "$FORCE_SEED" = false ]; then
     echo "Database already contains $CURRENT_COUNT vehicles."
@@ -76,7 +76,7 @@ fi
 echo "Database Information:"
 echo "   Host: localhost"
 echo "   Port: 5432"
-echo "   Database: carbrain_db"
+echo "   Database: carbrain_ai"
 echo "   Current vehicles: $CURRENT_COUNT"
 
 if [ "$FORCE_SEED" = true ]; then
@@ -104,10 +104,33 @@ echo "TypeScript compilation successful"
 # Run the seeding process
 echo "Running database seeding..."
 
+# Get project root directory
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
 # Create temporary seeding script
 TEMP_SCRIPT=$(mktemp)
 cat > "$TEMP_SCRIPT" << EOF
-const { runSeeding } = require('./dist/infrastructure/database/seeders/seed-runner');
+const path = require('path');
+const projectRoot = '${PROJECT_ROOT}';
+
+// Load environment variables from .env file
+require('dotenv').config({ path: path.join(projectRoot, '.env') });
+
+// Configure tsconfig-paths for compiled output (dist instead of src)
+const tsConfigPaths = require('tsconfig-paths');
+const baseUrl = path.join(projectRoot, 'dist');
+tsConfigPaths.register({
+  baseUrl,
+  paths: {
+    '@domain/*': ['src/domain/*'],
+    '@application/*': ['src/application/*'],
+    '@infrastructure/*': ['src/infrastructure/*'],
+    '@interface-adapters/*': ['src/interface-adapters/*'],
+    '@interfaces/*': ['src/interfaces/*']
+  }
+});
+
+const { runSeeding } = require(path.join(projectRoot, 'dist/src/infrastructure/database/seeders/seed-runner'));
 
 async function seed() {
     try {
@@ -126,18 +149,19 @@ async function seed() {
 seed();
 EOF
 
-# Execute seeding
-if node "$TEMP_SCRIPT"; then
+# Execute seeding from project root with proper module resolution
+cd "$PROJECT_ROOT"
+if NODE_PATH="$PROJECT_ROOT/node_modules:$NODE_PATH" node "$TEMP_SCRIPT"; then
     echo "SUCCESS: Database seeding completed!"
 
     # Show final statistics
-    FINAL_COUNT=$(docker-compose exec -T postgres psql -U carbrain_user -d carbrain_db -t -c "SELECT COUNT(*) FROM vehicles;" | tr -d ' ')
+    FINAL_COUNT=$(docker-compose exec -T postgres psql -U carbrain_user -d carbrain_ai -t -c "SELECT COUNT(*) FROM vehicles;" | tr -d ' ')
     echo "   Total vehicles in database: $FINAL_COUNT"
 
     # Show sample data
     echo ""
     echo "Sample vehicles:"
-    docker-compose exec -T postgres psql -U carbrain_user -d carbrain_db -c "
+    docker-compose exec -T postgres psql -U carbrain_user -d carbrain_ai -c "
         SELECT make, model, year,
                CONCAT('\$', TO_CHAR(price, 'FM999,999,999')) as price_mxn,
                condition

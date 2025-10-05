@@ -11,7 +11,23 @@
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:setup": "./scripts/db-setup.sh",
+    "db:seed": "./scripts/seed-data.sh",
+    "db:migrate": "./scripts/run-migration.sh",
+    "verify:ollama": "ts-node -r tsconfig-paths/register scripts/verify-ollama.ts",
+    "test:generation": "ts-node -r tsconfig-paths/register scripts/test-ollama-generation.ts",
+    "test:provider": "ts-node -r tsconfig-paths/register scripts/test-llm-provider.ts",
+    "test:embeddings": "ts-node -r tsconfig-paths/register scripts/test-embeddings.ts",
+    "test:pgvector": "ts-node -r tsconfig-paths/register scripts/test-pgvector.ts",
+    "test:vector-store": "ts-node -r tsconfig-paths/register scripts/test-vector-store.ts",
+    "sync:vehicle-embeddings": "ts-node -r tsconfig-paths/register scripts/test-vehicle-embedding-sync.ts",
+    "verify:rag": "ts-node -r tsconfig-paths/register scripts/verify-rag-dependencies.ts",
+    "test:semantic-search": "ts-node -r tsconfig-paths/register scripts/test-semantic-search.ts",
+    "test:conversational-rag": "ts-node -r tsconfig-paths/register scripts/test-conversational-rag.ts",
+    "test:conversation-memory": "ts-node -r tsconfig-paths/register scripts/test-conversation-memory.ts",
+    "test:ai-api": "ts-node -r tsconfig-paths/register scripts/test-ai-api.ts",
+    "test:e2e-ai": "ts-node -r tsconfig-paths/register scripts/test-e2e-ai-integration.ts"
   },
   "keywords": [
     "automotive",
@@ -35,10 +51,15 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@langchain/community": "^0.3.57",
+    "@langchain/core": "^0.3.78",
+    "@langchain/ollama": "^0.2.4",
+    "@langchain/openai": "^0.6.14",
     "@types/express": "^4.17.0",
     "@types/pg": "^8.10.0",
     "dotenv": "^16.3.0",
     "express": "^4.18.0",
+    "langchain": "^0.3.35",
     "pg": "^8.11.0",
     "zod": "^3.22.0"
   }
