@@ -90,9 +90,10 @@ const generateVIN = (make: string, year: number, sequence: number): string => {
 
   const makeCode = makeCodes[make] || '1XX';
   const yearCode = year.toString().slice(-1);
-  const sequenceStr = sequence.toString().padStart(6, '0');
+  const sequenceStr = sequence.toString().padStart(8, '0');
 
-  return `${makeCode}FB2${yearCode}XY${sequenceStr}`;
+  // VIN must be exactly 17 characters (3+5+1+8=17)
+  return `${makeCode}FB2KC${yearCode}${sequenceStr}`;
 };
 
 // Seed data for Mexican automotive market

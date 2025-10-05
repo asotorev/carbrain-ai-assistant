@@ -10,6 +10,7 @@ import { OllamaLLMProvider } from '@infrastructure/ai/providers/ollama-llm-provi
 import { SemanticVehicleSearchService } from '@application/services/semantic-vehicle-search.service';
 import { ConversationalRAGService, ConversationContext } from '@application/services/conversational-rag.service';
 import { dbConfig } from '@infrastructure/config/database';
+import { aiConfig } from '@infrastructure/config/ai';
 
 async function testConversationalRAG() {
   console.log('='.repeat(70));
@@ -30,9 +31,9 @@ async function testConversationalRAG() {
     console.log('Initializing AI services...');
     const db = DatabaseConnection.getInstance();
     const vehicleRepository = new VehicleRepository(db);
-    const embeddingService = new OllamaEmbeddingService();
-    const vectorStore = new PgVectorStore(pool);
-    const llmProvider = new OllamaLLMProvider();
+    const embeddingService = new OllamaEmbeddingService(aiConfig.ollama.embeddingModel);
+    const vectorStore = new PgVectorStore(pool, aiConfig.vectorStore.tableName);
+    const llmProvider = new OllamaLLMProvider(aiConfig.ollama.defaultModel);
 
     const semanticSearch = new SemanticVehicleSearchService(
       embeddingService,

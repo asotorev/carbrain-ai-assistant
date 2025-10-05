@@ -9,7 +9,11 @@ export interface AIConfig {
   ollama: {
     baseUrl: string;
     defaultModel: string;
+    embeddingModel: string;
     timeout: number;
+  };
+  vectorStore: {
+    tableName: string;
   };
   conversation: {
     maxHistoryLength: number;
@@ -21,7 +25,11 @@ export const aiConfig: AIConfig = {
   ollama: {
     baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
     defaultModel: process.env.OLLAMA_DEFAULT_MODEL || 'llama3.2',
+    embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL || 'nomic-embed-text',
     timeout: parseInt(process.env.OLLAMA_TIMEOUT || '30000', 10)
+  },
+  vectorStore: {
+    tableName: process.env.VECTOR_STORE_TABLE || 'vehicles'
   },
   conversation: {
     maxHistoryLength: parseInt(process.env.MAX_CONVERSATION_HISTORY || '10', 10),

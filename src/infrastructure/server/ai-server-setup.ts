@@ -12,6 +12,7 @@ import { SemanticVehicleSearchService } from '@application/services/semantic-veh
 import { ConversationalRAGService } from '@application/services/conversational-rag.service';
 import { AIController } from '@interface-adapters/controllers/ai.controller';
 import { createAIRoutes } from '@interface-adapters/routes/ai.routes';
+import { aiConfig } from '@infrastructure/config/ai';
 import { Router } from 'express';
 
 export interface AIServerConfig {
@@ -22,6 +23,7 @@ export interface AIServerConfig {
   dbPassword: string;
   ollamaBaseUrl?: string;
   ollamaModel?: string;
+  embeddingModel?: string;
 }
 
 export function setupAIServer(config: AIServerConfig): Router {
@@ -42,13 +44,13 @@ export function setupAIServer(config: AIServerConfig): Router {
 
   // Initialize AI services
   const embeddingService = new OllamaEmbeddingService(
-    config.ollamaBaseUrl || 'http://localhost:11434'
+    config.embeddingModel || aiConfig.ollama.embeddingModel
   );
 
-  const vectorStore = new PgVectorStore(pool);
+  const vectorStore = new PgVectorStore(pool, aiConfig.vectorStore.tableName);
 
   const llmProvider = new OllamaLLMProvider(
-    config.ollamaModel || 'llama3.2'
+    config.ollamaModel || aiConfig.ollama.defaultModel
   );
 
   const semanticSearch = new SemanticVehicleSearchService(

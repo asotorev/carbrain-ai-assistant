@@ -59,7 +59,7 @@ done
 
 # Build seeding command
 SEED_CMD="npm run build && node -e \"
-const { runSeeding } = require('./dist/infrastructure/database/seeders/seed-runner');
+const { runSeeding } = require('./dist/src/infrastructure/database/seeders/seed-runner');
 runSeeding({ force: $FORCE_SEED, verify: $VERIFY_DATA });
 \""
 
@@ -122,15 +122,15 @@ const baseUrl = path.join(projectRoot, 'dist');
 tsConfigPaths.register({
   baseUrl,
   paths: {
-    '@domain/*': ['domain/*'],
-    '@application/*': ['application/*'],
-    '@infrastructure/*': ['infrastructure/*'],
-    '@interface-adapters/*': ['interface-adapters/*'],
-    '@interfaces/*': ['interfaces/*']
+    '@domain/*': ['src/domain/*'],
+    '@application/*': ['src/application/*'],
+    '@infrastructure/*': ['src/infrastructure/*'],
+    '@interface-adapters/*': ['src/interface-adapters/*'],
+    '@interfaces/*': ['src/interfaces/*']
   }
 });
 
-const { runSeeding } = require(path.join(projectRoot, 'dist/infrastructure/database/seeders/seed-runner'));
+const { runSeeding } = require(path.join(projectRoot, 'dist/src/infrastructure/database/seeders/seed-runner'));
 
 async function seed() {
     try {
