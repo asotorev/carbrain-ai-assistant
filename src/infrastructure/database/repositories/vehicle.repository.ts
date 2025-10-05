@@ -392,7 +392,14 @@ export class VehicleRepository implements IVehicleRepository {
 
   async findByIds(ids: string[]): Promise<Vehicle[]> {
     if (ids.length === 0) return [];
-    const query = this.getBaseQuery() + ' WHERE v.id = ANY($1::uuid[])';
+
+    // Use PostgreSQL array operators to fetch all vehicles in a single query
+    // array_position preserves the order from the input IDs array (important for relevance ranking)
+    const query = this.getBaseQuery() + `
+      WHERE v.id = ANY($1::uuid[])
+      ORDER BY array_position($1::uuid[], v.id)
+    `;
+
     const result = await this.db.query<any>(query, [ids]);
     return result.rows.map(row => this.mapRowToVehicle(row));
   }

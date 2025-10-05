@@ -100,16 +100,10 @@ export class SemanticVehicleSearchService {
   }
 
   private async fetchVehiclesByIds(ids: string[]): Promise<Vehicle[]> {
-    const vehicles: Vehicle[] = [];
-
-    for (const id of ids) {
-      const vehicle = await this.vehicleRepository.findById(id);
-      if (vehicle) {
-        vehicles.push(vehicle);
-      }
-    }
-
-    return vehicles;
+    // Use batch query to fetch all vehicles in a single database round trip
+    // This avoids the N+1 query problem (1 query instead of N individual queries)
+    // Order is preserved by the repository to maintain relevance ranking from vector search
+    return this.vehicleRepository.findByIds(ids);
   }
 
   private async interpretQuery(query: string): Promise<string> {

@@ -47,6 +47,7 @@ export class ConversationalRAGService {
       model: modelName,
       baseUrl: baseUrl,
       temperature: 0.7,
+      numPredict: 100,  // Limit response length for faster test execution
     });
 
     this.outputParser = new StringOutputParser();
