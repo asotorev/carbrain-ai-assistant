@@ -1,9 +1,10 @@
 // Test script for vehicle embedding synchronization service
 // Validates batch embedding generation and database synchronization
 
+import 'dotenv/config';
 import { Pool } from 'pg';
 import { VehicleEmbeddingSyncService } from '../src/infrastructure/ai/services/vehicle-embedding-sync.service';
-import { OllamaEmbeddingService } from '../src/infrastructure/ai/embeddings/ollama-embedding-service';
+import { AIProviderFactory } from "@infrastructure/ai/ai-provider-factory";
 import { dbConfig } from '../src/infrastructure/config/database';
 import { aiConfig } from '../src/infrastructure/config/ai';
 
@@ -21,7 +22,7 @@ async function testVehicleEmbeddingSync(): Promise<void> {
   console.log('='.repeat(60));
   console.log();
 
-  const embeddingService = new OllamaEmbeddingService(aiConfig.ollama.embeddingModel);
+  const embeddingService = AIProviderFactory.createEmbeddingService();
   const syncService = new VehicleEmbeddingSyncService(pool, embeddingService);
 
   try {

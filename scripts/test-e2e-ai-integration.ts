@@ -69,7 +69,7 @@ async function runE2EIntegrationTest() {
   console.log('='.repeat(80));
   console.log('\nThis test validates the complete AI pipeline:');
   console.log('  1. Database connectivity and schema');
-  console.log('  2. Ollama LLM and embedding services');
+  console.log('  2. LLM and embedding services');
   console.log('  3. Vector store operations');
   console.log('  4. Semantic search functionality');
   console.log('  5. Conversational RAG pipeline');
@@ -90,7 +90,7 @@ async function runE2EIntegrationTest() {
     // Run test suite
     results.push(await runTest('Database Connection', testDatabaseConnection));
     results.push(await runTest('Vehicle Data Availability', () => testVehicleData(port)));
-    results.push(await runTest('Ollama Services Health', () => testOllamaHealth(port)));
+    results.push(await runTest('AI Services Health', () => testAIServicesHealth(port)));
     results.push(await runTest('Vector Store Operations', testVectorStore));
     results.push(await runTest('Semantic Search', () => testSemanticSearch(port)));
     results.push(await runTest('Conversational RAG', () => testConversationalRAG(port)));
@@ -125,9 +125,7 @@ async function setupTestEnvironment() {
     dbPort: dbConfig.port,
     dbName: dbConfig.database,
     dbUser: dbConfig.username,
-    dbPassword: dbConfig.password,
-    ollamaBaseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-    ollamaModel: process.env.OLLAMA_DEFAULT_MODEL || 'llama3.2'
+    dbPassword: dbConfig.password
   });
 
   app.use('/api/ai', aiRoutes);
@@ -183,7 +181,7 @@ async function testVehicleData(port: number) {
   }
 }
 
-async function testOllamaHealth(port: number) {
+async function testAIServicesHealth(port: number) {
   const response = await fetch(`http://localhost:${port}/api/ai/health`);
   const data = await response.json() as HealthResponse;
 

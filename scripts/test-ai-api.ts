@@ -52,9 +52,7 @@ async function testAIAPI() {
     dbPort: dbConfig.port,
     dbName: dbConfig.database,
     dbUser: dbConfig.username,
-    dbPassword: dbConfig.password,
-    ollamaBaseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-    ollamaModel: process.env.OLLAMA_DEFAULT_MODEL || 'llama3.2'
+    dbPassword: dbConfig.password
   });
 
   app.use('/api/ai', aiRoutes);

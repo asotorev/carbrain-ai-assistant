@@ -2,7 +2,7 @@
 // Validates vector storage, similarity search, and index performance
 
 import { Pool } from 'pg';
-import { OllamaEmbeddingService } from '../src/infrastructure/ai/embeddings/ollama-embedding-service';
+import { AIProviderFactory } from "@infrastructure/ai/ai-provider-factory";
 import { dbConfig } from '../src/infrastructure/config/database';
 import { aiConfig } from '@infrastructure/config/ai';
 
@@ -81,7 +81,7 @@ async function testPgvector(): Promise<void> {
     console.log('Test 4: Vector Storage Test');
     console.log('-'.repeat(60));
 
-    const embeddingService = new OllamaEmbeddingService(aiConfig.ollama.embeddingModel);
+    const embeddingService = AIProviderFactory.createEmbeddingService();
     const isAvailable = await embeddingService.isAvailable();
 
     if (!isAvailable) {

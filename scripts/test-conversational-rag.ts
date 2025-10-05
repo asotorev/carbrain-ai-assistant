@@ -1,12 +1,12 @@
 // Test script for conversational RAG service
 // Demonstrates multi-turn vehicle search conversations with context
 
+import 'dotenv/config';
 import { Pool } from 'pg';
 import { DatabaseConnection } from '@infrastructure/database/connection';
 import { VehicleRepository } from '@infrastructure/database/repositories/vehicle.repository';
-import { OllamaEmbeddingService } from '@infrastructure/ai/embeddings/ollama-embedding-service';
 import { PgVectorStore } from '@infrastructure/ai/vector-stores/pgvector-store';
-import { OllamaLLMProvider } from '@infrastructure/ai/providers/ollama-llm-provider';
+import { AIProviderFactory } from '@infrastructure/ai/ai-provider-factory';
 import { SemanticVehicleSearchService } from '@application/services/semantic-vehicle-search.service';
 import { ConversationalRAGService, ConversationContext } from '@application/services/conversational-rag.service';
 import { dbConfig } from '@infrastructure/config/database';
@@ -29,11 +29,15 @@ async function testConversationalRAG() {
   try {
     // Initialize services
     console.log('Initializing AI services...');
+    const providerInfo = AIProviderFactory.getProviderInfo();
+    console.log(`Using ${providerInfo.provider} provider (LLM: ${providerInfo.llmModel}, Embeddings: ${providerInfo.embeddingModel})`);
+    console.log();
+
     const db = DatabaseConnection.getInstance();
     const vehicleRepository = new VehicleRepository(db);
-    const embeddingService = new OllamaEmbeddingService(aiConfig.ollama.embeddingModel);
+    const embeddingService = AIProviderFactory.createEmbeddingService();
     const vectorStore = new PgVectorStore(pool, aiConfig.vectorStore.tableName);
-    const llmProvider = new OllamaLLMProvider(aiConfig.ollama.defaultModel);
+    const llmProvider = AIProviderFactory.createLLMProvider();
 
     const semanticSearch = new SemanticVehicleSearchService(
       embeddingService,

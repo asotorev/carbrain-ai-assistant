@@ -87,18 +87,25 @@ async function verifyRAGDependencies(): Promise<void> {
   console.log('-'.repeat(60));
 
   const integrations = [
-    'Ollama LLM (already integrated)',
-    'Ollama Embeddings (already integrated)',
+    'OpenAI LLM (production provider)',
+    'OpenAI Embeddings (production provider)',
+    'Ollama LLM (local development provider)',
+    'Ollama Embeddings (local development provider)',
     'Custom Vector Store (pgvector implemented)',
-    'PostgreSQL Chat History (to be implemented)',
-    'Conversation Memory (to be implemented)',
-    'Retrieval Chains (to be implemented)'
+    'PostgreSQL Chat History (implemented)',
+    'Conversation Memory (implemented)',
+    'Retrieval Chains (implemented)'
   ];
 
   console.log('Available Integrations:');
   integrations.forEach((integration, i) => {
     console.log(`${i + 1}. ${integration}`);
   });
+  console.log();
+
+  console.log('Provider Selection:');
+  console.log('Set AI_PROVIDER=openai for production (fast, high-quality)');
+  console.log('Set AI_PROVIDER=ollama for local development (free, private)');
   console.log();
 
   console.log('='.repeat(60));

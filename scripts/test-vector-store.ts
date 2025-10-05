@@ -3,7 +3,7 @@
 
 import { Pool } from 'pg';
 import { PgVectorStore } from '../src/infrastructure/ai/vector-stores/pgvector-store';
-import { OllamaEmbeddingService } from '../src/infrastructure/ai/embeddings/ollama-embedding-service';
+import { AIProviderFactory } from "@infrastructure/ai/ai-provider-factory";
 import { dbConfig } from '../src/infrastructure/config/database';
 import { aiConfig } from '@infrastructure/config/ai';
 
@@ -22,7 +22,7 @@ async function testVectorStore(): Promise<void> {
   console.log();
 
   const vectorStore = new PgVectorStore(pool, 'test_vector_documents');
-  const embeddingService = new OllamaEmbeddingService(aiConfig.ollama.embeddingModel);
+  const embeddingService = AIProviderFactory.createEmbeddingService();
 
   try {
     // Test 1: Initialize vector store

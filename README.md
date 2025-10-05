@@ -17,8 +17,8 @@ CarBrain is an intelligent sales assistant that helps car dealerships provide pe
 
 - **Frontend:** React + TypeScript + TailwindCSS
 - **Backend:** Node.js + TypeScript + Clean Architecture
-- **AI/ML:** Local LLM (Ollama) + Fine-tuning + RAG
-- **Database:** PostgreSQL + Vector Database (Chroma/Pinecone)
+- **AI/ML:** OpenAI (gpt-3.5-turbo) or Local LLM (Ollama) + RAG + pgvector
+- **Database:** PostgreSQL + Vector Database (pgvector)
 - **Infrastructure:** Docker + AWS Lambda
 
 ### Key Features
@@ -207,8 +207,8 @@ This positions the project as a sophisticated enterprise solution demonstrating 
 #### External Services
 
 - **PostgreSQLVehicleRepository**
-- **PineconeVectorDatabase**
-- **OllamaLLMService**
+- **PgVectorDatabase**
+- **OpenAILLMService** (production) or **OllamaLLMService** (local)
 - **AWSS3FileStorage**
 - **SendGridNotificationService**
 
@@ -227,9 +227,9 @@ This positions the project as a sophisticated enterprise solution demonstrating 
 
 #### Base Model Strategy
 
-- **Local LLM:** Llama 3.1 8B (via Ollama) for core conversations
-- **Fine-Tuned Specialist:** Custom automotive domain model
-- **Embedding Model:** all-MiniLM-L6-v2 for vehicle search and RAG
+- **Production:** OpenAI gpt-3.5-turbo (fast, high-quality responses)
+- **Local/Dev:** Llama 3.2 1B (via Ollama) for cost-free development
+- **Embedding Model:** text-embedding-3-small (OpenAI) or nomic-embed-text (Ollama)
 
 ### Fine-Tuning Approach
 
